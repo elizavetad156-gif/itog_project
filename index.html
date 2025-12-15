@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elegance - Украшения ручной работы</title>
+    
+    <!-- Иконки -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS для карт -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Chart.js для графиков -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="jewelry-spinner">
+                <div class="ring"></div>
+                <div class="diamond"></div>
+            </div>
+            <p>Загрузка украшений...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <nav class="nav">
+            <div class="logo">
+                <i class="fas fa-gem"></i>
+                <span>Elegance</span>
+            </div>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#" class="nav-link active" onclick="showSection('home')">
+                    <i class="fas fa-home"></i> Главная
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('products')">
+                    <i class="fas fa-ring"></i> Коллекции
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('stores')">
+                    <i class="fas fa-store"></i> Магазины
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('dashboard')">
+                    <i class="fas fa-user"></i> Профиль
+                </a></li>
+                <li><a href="#" class="nav-link" onclick="showSection('cart')">
+                    <i class="fas fa-shopping-cart"></i> Корзина <span class="cart-count">0</span>
+                </a></li>
+            </ul>
+            
+            <div class="auth-section">
+                <div id="guestButtons">
+                    <button class="btn btn-outline" onclick="showModal('loginModal')">
+                        <i class="fas fa-sign-in-alt"></i> Войти
+                    </button>
+                    <button class="btn btn-primary" onclick="showModal('registerModal')">
+                        <i class="fas fa-user-plus"></i> Регистрация
+                    </button>
+                </div>
+                <div class="user-menu hidden" id="userMenu">
+                    <img src="https://ui-avatars.com/api/?name=User&background=FFD6E7&color=8B5FBF" alt="Аватар" class="user-avatar" id="userAvatar">
+                    <span id="userName">Гость</span>
+                    <button class="btn btn-logout" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1 class="hero-title animate-fade-in">Украшения ручной работы</h1>
+                <p class="hero-subtitle animate-fade-in-delay">Изысканность в каждой детали</p>
+                <button class="btn btn-primary btn-large animate-slide-up" onclick="showSection('products')">
+                    Смотреть коллекцию
+                </button>
+            </div>
+            
+            <div class="container">
+                <h2 class="section-title">Почему выбирают нас</h2>
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-hand-sparkles"></i>
+                        </div>
+                        <h3>Ручная работа</h3>
+                        <p>Каждое украшение создается с любовью и вниманием к деталям</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <h3>Натуральные камни</h3>
+                        <p>Используем только качественные материалы и натуральные камни</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                        <h3>Быстрая доставка</h3>
+                        <p>Доставка по всей России в кратчайшие сроки</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products" class="section">
+            <div class="container">
+                <h2 class="section-title">Наши коллекции</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all" onclick="filterProducts('all')">Все</button>
+                    <button class="filter-btn" data-filter="rings" onclick="filterProducts('rings')">Кольца</button>
+                    <button class="filter-btn" data-filter="earrings" onclick="filterProducts('earrings')">Серьги</button>
+                    <button class="filter-btn" data-filter="necklaces" onclick="filterProducts('necklaces')">Колье</button>
+                    <button class="filter-btn" data-filter="bracelets" onclick="filterProducts('bracelets')">Браслеты</button>
+                </div>
+                
+                <div class="products-grid" id="productsGrid">
+                    <!-- Товары загружаются через JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Stores Section -->
+        <section id="stores" class="section">
+            <div class="container">
+                <h2 class="section-title">Наши магазины</h2>
+                <div class="stores-container">
+                    <div class="map-container">
+                        <div id="map"></div>
+                        <div class="map-controls mt-2">
+                            <button class="btn btn-outline" onclick="locateUser()">
+                                <i class="fas fa-location-arrow"></i> Мое местоположение
+                            </button>
+                        </div>
+                    </div>
+                 <div class="stores-list">
+    <h3><i class="fas fa-map-marker-alt"></i> Адреса магазинов</h3>
+    <div id="storesList" class="stores-list-container">
+        <!-- Карточки магазинов загружаются через JS -->
+    </div>
+</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section">
+            <div class="container">
+                <h2 class="section-title">Личный кабинет</h2>
+                <div class="dashboard-container">
+                    <div class="dashboard-sidebar">
+                        <div class="user-info-card">
+                            <img src="https://ui-avatars.com/api/?name=User&background=FFD6E7&color=8B5FBF" alt="Аватар" class="dashboard-avatar" id="dashboardAvatar">
+                            <h3 id="dashboardUserName">Гость</h3>
+                            <p id="dashboardUserEmail">Войдите в систему</p>
+                            <div class="user-stats">
+                                <div class="stat">
+                                    <span class="stat-number" id="statOrders">0</span>
+                                    <span class="stat-label">Заказов</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number" id="statCart">0</span>
+                                    <span class="stat-label">В корзине</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number" id="statFavorites">0</span>
+                                    <span class="stat-label">Избранное</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <nav class="dashboard-nav">
+                            <a href="#" class="dashboard-nav-link active" onclick="showDashboardTab('profile')">
+                                <i class="fas fa-user"></i> Профиль
+                            </a>
+                            <a href="#" class="dashboard-nav-link" onclick="showDashboardTab('orders')">
+                                <i class="fas fa-shopping-bag"></i> Мои заказы
+                            </a>
+                            <a href="#" class="dashboard-nav-link" onclick="showDashboardTab('favorites')">
+                                <i class="fas fa-heart"></i> Избранное
+                            </a>
+                            <a href="#" class="dashboard-nav-link" onclick="showDashboardTab('statistics')">
+                                <i class="fas fa-chart-pie"></i> Статистика
+                            </a>
+                        </nav>
+                    </div>
+                    
+                    <div class="dashboard-content">
+                        <!-- Profile Tab -->
+                        <div id="profileTab" class="dashboard-tab active">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-user-circle"></i> Личная информация</h3>
+                            </div>
+                            <form id="profileForm" class="mt-2">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>Имя</label>
+                                        <input type="text" id="profileName" placeholder="Введите ваше имя">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" id="profileEmail" placeholder="Введите ваш email" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Телефон</label>
+                                        <input type="tel" id="profilePhone" placeholder="+7 (999) 999-99-99">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Адрес доставки</label>
+                                        <input type="text" id="profileAddress" placeholder="Введите ваш адрес">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Сохранить изменения
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Orders Tab -->
+                        <div id="ordersTab" class="dashboard-tab">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-shopping-bag"></i> История заказов</h3>
+                                <button class="btn btn-outline" onclick="refreshOrders()">
+                                    <i class="fas fa-sync-alt"></i> Обновить
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <table class="orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>№ Заказа</th>
+                                            <th>Дата</th>
+                                            <th>Товары</th>
+                                            <th>Сумма</th>
+                                            <th>Статус</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTableBody">
+                                        <tr>
+                                            <td colspan="5" class="text-center">У вас пока нет заказов</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Favorites Tab -->
+                        <div id="favoritesTab" class="dashboard-tab">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-heart"></i> Избранное</h3>
+                                <button class="btn btn-outline" onclick="clearFavorites()">
+                                    <i class="fas fa-trash"></i> Очистить все
+                                </button>
+                            </div>
+                            <div class="products-grid mt-2" id="favoritesGrid">
+                                <div class="text-center">
+                                    <i class="fas fa-heart" style="font-size: 3rem; color: var(--pastel-pink); margin-bottom: 1rem;"></i>
+                                    <h4>Список избранного пуст</h4>
+                                    <p>Добавляйте товары в избранное, нажимая на сердечко</p>
+                                    <button class="btn btn-primary mt-2" onclick="showSection('products')">
+                                        <i class="fas fa-shopping-bag"></i> Перейти к покупкам
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistics Tab -->
+                        <div id="statisticsTab" class="dashboard-tab">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-chart-pie"></i> Статистика покупок</h3>
+                                <select id="statPeriod" class="form-select" onchange="updateStatistics()">
+                                    <option value="month">За месяц</option>
+                                    <option value="quarter">За квартал</option>
+                                    <option value="year" selected>За год</option>
+                                </select>
+                            </div>
+                            <div class="features mt-2">
+                                <div class="feature-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <div class="stat-value" id="totalOrdersStat">0</div>
+                                        <div class="stat-label">Всего заказов</div>
+                                    </div>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-ruble-sign"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <div class="stat-value" id="totalSpentStat">0 ₽</div>
+                                        <div class="stat-label">Всего потрачено</div>
+                                    </div>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <div class="stat-value" id="avgOrderStat">0 ₽</div>
+                                        <div class="stat-label">Средний чек</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <canvas id="categoryChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cart Section -->
+        <section id="cart" class="section">
+            <div class="container">
+                <h2 class="section-title">Корзина</h2>
+                <div class="cart-container">
+                    <div class="cart-items" id="cartItems">
+                        <div class="text-center">
+                            <i class="fas fa-shopping-cart" style="font-size: 3rem; color: var(--pastel-lavender); margin-bottom: 1rem;"></i>
+                            <h3>Корзина пуста</h3>
+                            <p>Добавьте товары из каталога</p>
+                            <button class="btn btn-primary mt-2" onclick="showSection('products')">
+                                <i class="fas fa-shopping-bag"></i> Перейти к покупкам
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="cart-summary">
+                        <h3>Итого</h3>
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Товаров:</span>
+                                <span id="totalItems">0</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Сумма:</span>
+                                <span id="subtotal">0 ₽</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Доставка:</span>
+                                <span id="shipping">0 ₽</span>
+                            </div>
+                            <div class="summary-row discount">
+                                <span>Скидка:</span>
+                                <span id="discount">0 ₽</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>К оплате:</span>
+                                <span id="totalAmount">0 ₽</span>
+                            </div>
+                        </div>
+                        <div class="promo-code">
+                            <input type="text" id="promoCode" placeholder="Промокод">
+                            <button class="btn btn-outline" onclick="applyPromoCode()">Применить</button>
+                        </div>
+                        <button class="btn btn-primary btn-checkout" onclick="checkout()">
+                            <i class="fas fa-lock"></i> Оформить заказ
+                        </button>
+                        <p class="text-center mt-2">
+                            <i class="fas fa-shield-alt"></i> Безопасная оплата
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Elegance</h3>
+                    <p>Украшения ручной работы с 2015 года</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-vk"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Каталог</h4>
+                    <ul>
+                        <li><a href="#" onclick="showSection('products')">Кольца</a></li>
+                        <li><a href="#" onclick="showSection('products')">Серьги</a></li>
+                        <li><a href="#" onclick="showSection('products')">Колье</a></li>
+                        <li><a href="#" onclick="showSection('products')">Браслеты</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Помощь</h4>
+                    <ul>
+                        <li><a href="#">Доставка и оплата</a></li>
+                        <li><a href="#">Возврат и обмен</a></li>
+                        <li><a href="#">Размеры</a></li>
+                        <li><a href="#">Контакты</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
+                    <p><i class="fas fa-envelope"></i> info@elegance.ru</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Москва, ул. Примерная, 10</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Elegance. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('loginModal')">&times;</button>
+            <h2>Вход в аккаунт</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="example@mail.ru">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="loginPassword" required placeholder="Введите пароль">
+                    <div class="password-toggle">
+                        <i class="fas fa-eye" onclick="togglePasswordVisibility('loginPassword', this)"></i>
+                    </div>
+                </div>
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        <span>Запомнить меня</span>
+                    </label>
+                    <a href="#" class="forgot-password">Забыли пароль?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Войти
+                </button>
+            </form>
+            <p class="text-center mt-2">
+                Нет аккаунта? <a href="#" onclick="showModal('registerModal')">Зарегистрироваться</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('registerModal')">&times;</button>
+            <h2>Регистрация</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Имя</label>
+                    <input type="text" id="registerName" required placeholder="Иван Иванов">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" required placeholder="example@mail.ru">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="registerPassword" required placeholder="Минимум 6 символов">
+                    <div class="password-toggle">
+                        <i class="fas fa-eye" onclick="togglePasswordVisibility('registerPassword', this)"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Подтвердите пароль</label>
+                    <input type="password" id="registerConfirmPassword" required placeholder="Повторите пароль">
+                    <div class="password-toggle">
+                        <i class="fas fa-eye" onclick="togglePasswordVisibility('registerConfirmPassword', this)"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Телефон (необязательно)</label>
+                    <input type="tel" id="registerPhone" placeholder="+7 (999) 999-99-99">
+                </div>
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="acceptTerms" required>
+                        <span>Я согласен с правилами и политикой конфиденциальности</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-user-plus"></i> Зарегистрироваться
+                </button>
+            </form>
+            <p class="text-center mt-2">
+                Уже есть аккаунт? <a href="#" onclick="showModal('loginModal')">Войти</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <!-- JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
